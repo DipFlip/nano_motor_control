@@ -5,13 +5,11 @@ import time
 ser = serial.Serial(port='/dev/ttyUSB0',baudrate=9600, 
     bytesize=8, stopbits=1, parity=serial.PARITY_NONE, timeout=1, xonxoff=0, rtscts=0, dsrdtr=0)
 
-# select address (which motor) to talk to
-ser.write(b'\x014')
+#some motor command examples
 ser.write(b'TP\r') #tell position
 ser.write(b'MN\r') #motor on
 ser.write(b'MF\r') #motor off
-ser.write(b'RT\r') #reset (if error)
-ser.readline() #read the response from the motor controller
+ser.write(b'RT\r') #reset (if there has been an error)
 
 def select_motor(motor_address):
     """write the character 0x01 followed by the motor address number without /r to select that motor"""
@@ -24,7 +22,7 @@ def select_motor(motor_address):
 def command(command_string):
     """Sends the command followed by \r then prints and returns the response """
     ser.write(command_string.encode() + b'\r')
-    response = ser.readline()#.strip('\r\n'+chr(0x03))   #the controller replies 
+    response = ser.readline()#.strip('\r\n'+chr(0x03))  #the controller's replies 
                                                         #end with '\n\r'+ETX (end-of-text, 0x03),
                                                         #which should be removed.
     print(response)
