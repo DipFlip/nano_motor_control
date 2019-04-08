@@ -1,8 +1,10 @@
 from PyQt5 import QtCore, QtGui, QtWidgets, uic
 import QT_resource_file_rc
 import sys
-
-
+import numpy as np
+import random
+from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
+QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 qtCreatorFile = "motor_control_gui.ui"
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
  
@@ -12,30 +14,60 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.pushButton.clicked.connect(self.move_motor)
+        self.homeMotors.clicked.connect(self.update_graph)
+        self.scanstart_copy.clicked.connect(self.copy_start)
+        self.scanstop_copy.clicked.connect(self.copy_stop)
         self.mapmtMap.mousePressEvent = self.getPos
+        self.setXBox.valueChanged.connect(self.move_marker)
+        self.setYBox.valueChanged.connect(self.move_marker)
     def getPos(self , event):
         x = event.pos().x()
         y = event.pos().y() 
-        x_global = event.globalPos().x()
-        y_global = event.globalPos().y()
-        x_screen = self.mapmtMap.mapToGlobal(event.pos()).x()
-        y_screen = self.mapmtMap.mapToGlobal(event.pos()).y()
-        xw = self.mapFromGlobal(event.globalPos()).x()-25
-        yw = self.mapFromGlobal(event.globalPos()).y()-55
-        rel_x = self.mapmtMap.mapFromGlobal(event.globalPos()).x()
-        rel_y = self.mapmtMap.mapFromGlobal(event.globalPos()).y()
+        rel_x, rel_y = wid_rel_to_mapmt_xy(x, y)
         self.setXBox.setValue(rel_x)
         self.setYBox.setValue(rel_y)
-        self.position_x.move(xw, yw)
-        print(f"x:{x}, y:{y}, gx:{x_global}, gy:{y_global}, sx:{x_screen}, sy:{y_screen}")
-        # self.mapmt_map.mousePressEvent = self.map_clicked
+    def move_marker(self, event):
+        rel_x, rel_y = mapmt_xy_to_wid_rel(self.setXBox.value(), self.setYBox.value())
+        self.motor_marker_to_go.move(rel_x-5, rel_y-8)
+    def copy_start(self, event):
+        self.scanstart_x.setValue(self.setXBox.value())
+        self.scanstart_y.setValue(self.setYBox.value())
+    def copy_stop(self, event):
+        self.scanstop_x.setValue(self.setXBox.value())
+        self.scanstop_y.setValue(self.setYBox.value())
     def move_motor(self, b):
         if self.relative_radio.isChecked():
             print("relative")
         if self.absolute_radio.isChecked():
             print("absolute")
+            self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
         if self.mapmt_radio.isChecked():
             print("mapmt")
+            self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/off.png'))
+    def update_graph(self):
+        fs = 500
+        f = random.randint(1, 100)
+        ts = 1/fs
+        length_of_signal = 100
+        t = np.linspace(0,1,length_of_signal)
+        cosinus_signal = np.cos(2*np.pi*f*t)
+        sinus_signal = np.sin(2*np.pi*f*t)
+        self.MplWidget.canvas.axes.clear()
+        self.MplWidget.canvas.axes.plot(t, cosinus_signal)
+        self.MplWidget.canvas.axes.plot(t, sinus_signal)
+        self.MplWidget.canvas.axes.legend(('cosinus', 'sinus'),loc='upper right')
+        self.MplWidget.canvas.axes.set_title('Cosinus - Sinus Signal')
+        self.MplWidget.canvas.draw()
+
+def wid_rel_to_mapmt_xy(rel_x, rel_y):
+    x = rel_x*48.5/249-2.7
+    y = 51.2-rel_y*48.5/249
+    return x, y
+
+def mapmt_xy_to_wid_rel(mapmt_x, mapmt_y):
+    x = (mapmt_x+2.7)*249/48.5
+    y = (51.2-mapmt_y)*249/48.5
+    return x, y
 
 if __name__ == "__main__":
     # app = QtGui.QApplication(sys.argv)

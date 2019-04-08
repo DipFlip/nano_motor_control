@@ -6,6 +6,21 @@ from datetime import datetime #TODO write time for each scan position in log fil
 import time
 import psutil #to check if EFU is running
 
+
+class Scanner():
+    """class for scanning MAPMT in the nano chamber in the micro-beam hall"""
+    def __init__(self):
+        self.path_to_libraries = '/home/seian/LaserScan'
+        self.output_directory = '/media/emil/NTFS_partition/IFE_june_2018/data'
+        self.runname = "S11"
+        self.dir_to_make = f"{output_directory}/{runname}"
+        if not os.path.exists(dir_to_make):
+            os.mkdir(dir_to_make)
+        else:
+            print(f"Error: Directory {self.,dir_to_make} already exists! Exiting")
+            sys.exit()
+
+
 path_to_libraries = '/home/seian/LaserScan'
 output_directory = '/media/emil/NTFS_partition/IFE_june_2018/data'
 runname = "S11"
