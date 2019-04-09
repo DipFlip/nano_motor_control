@@ -27,12 +27,13 @@ class Scanner():
             nc.home_all()
         elif laser_setup:
             if not check_if_process_is_running('testwise'):
+                print('testwise wasnt running..')
                 subprocess.call(['gnome-terminal', '-x', self.path_to_libraries+'/testwise'])
                 print('Homeing laser motors...')
                 # TODO check if Z motor needs to be moved to somewhere...
                 time.sleep(5)
                 
-    def set_motor_translation(self, motor_x, motor_t, mapmt_x, mapmt_y):
+    def set_motor_translation(self, motor_x, motor_y, mapmt_x, mapmt_y):
         """
         Enter the motor and corresponding MAPMT positions for some position
         and absolute motor positions for MAPMT (0,0) will be calculated.

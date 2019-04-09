@@ -18,6 +18,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.move_motor_button.clicked.connect(self.move_motor)
         self.new_plot_button.clicked.connect(self.update_graph)
         self.scanstart_copy.clicked.connect(self.copy_start)
+        self.calibrate_button.clicked.connect(self.calibrate)
         self.scanstop_copy.clicked.connect(self.copy_stop)
         self.initiate.clicked.connect(self.initiate_motors)
         self.mapmtMap.mousePressEvent = self.getPos
@@ -33,6 +34,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             nano = True
         self.scanner = ns.Scanner(laser_setup=LTF, nano_setup=nano)
         self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
+        self.YMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
+        self.ZMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
+    def calibrate(self):
+        self.scanner.set_motor_translation(self.cal_motor_x.value(), self.cal_motor_y.value(), self.cal_mapmt_x.value(), self.cal_mapmt_y.value())
     def getPos(self , event):
         x = event.pos().x()
         y = event.pos().y() 
@@ -49,10 +54,16 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.scanstop_x.setValue(self.setXBox.value())
         self.scanstop_y.setValue(self.setYBox.value())
     def move_motor(self, b):
+        x = self.setXBox.value()
+        y = self.setYBox.value()
         if self.LTF_radio.isChecked():
-            self.scanner.move_laser_motors(self.setXBox.value(), self.setYBox.value())
+            self.scanner.move_laser_motors(x, y)
         if self.nano_radio.isChecked():
-            self.scanner.move_nano_motors(self.setXBox.value(), self.setYBox.value())
+            self.scanner.move_nano_motors(x, y)
+        rel_x, rel_y = mapmt_xy_to_wid_rel(x, y)
+        self.motor_marker_now.move(rel_x-5, rel_y-8)
+        self.nowXBox.setValue(x)
+        self.nowYBox.setValue(y)
     def update_graph(self):
         fs = 500
         f = random.randint(1, 100)
