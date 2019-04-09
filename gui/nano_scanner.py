@@ -32,10 +32,12 @@ class Scanner():
             nc.configure_motor_parameters()
             nc.home_all()
         elif laser_setup:
-            subprocess.call(['gnome-terminal', '-x', self.path_to_libraries+'/testwise'])
-            print('Homeing laser motors...')
-            # TODO check if Z motor needs to be moved to somewhere...
-            time.sleep(5)
+            if not check_if_process_is_running('testwise'):
+                subprocess.call(['gnome-terminal', '-x', self.path_to_libraries+'/testwise'])
+                print('Homeing laser motors...')
+                # TODO check if Z motor needs to be moved to somewhere...
+                time.sleep(5)
+                
     def set_motor_translation(self, motor_x, motor_t, mapmt_x, mapmt_y):
         """
         Enter the motor and corresponding MAPMT positions for some position
@@ -99,7 +101,13 @@ class Scanner():
                     proc.communicate() #should wait until the process is done
                 print("Closing DAQ")
         return 0
-
+def check_if_process_is_running(process_name):
+    for pid in psutil.pids():
+        p = psutil.Process(pid)
+        if process_name in p.name():
+            print (f"{p.name} is running with pid {pid} !")
+            return True
+    return False
 
 # convert files from binary to root
 #for j in $(cat $RUNLIST) ; do
