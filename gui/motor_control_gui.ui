@@ -553,7 +553,7 @@
     <property name="title">
      <string>Coordinate systems calibration</string>
     </property>
-    <widget class="QPushButton" name="pushButton_2">
+    <widget class="QPushButton" name="calibrate_button">
      <property name="geometry">
       <rect>
        <x>100</x>
@@ -577,7 +577,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_6">
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="setYBox_4">
+       <widget class="QDoubleSpinBox" name="cal_motor_y">
         <property name="minimum">
          <double>-10.000000000000000</double>
         </property>
@@ -587,10 +587,13 @@
         <property name="singleStep">
          <double>0.250000000000000</double>
         </property>
+        <property name="value">
+         <double>108.000000000000000</double>
+        </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="setXBox_4">
+       <widget class="QDoubleSpinBox" name="cal_motor_x">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -605,6 +608,9 @@
         </property>
         <property name="singleStep">
          <double>0.250000000000000</double>
+        </property>
+        <property name="value">
+         <double>49.500000000000000</double>
         </property>
        </widget>
       </item>
@@ -654,7 +660,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="setYBox_3">
+       <widget class="QDoubleSpinBox" name="cal_mapmt_y">
         <property name="minimum">
          <double>-10.000000000000000</double>
         </property>
@@ -664,10 +670,13 @@
         <property name="singleStep">
          <double>0.250000000000000</double>
         </property>
+        <property name="value">
+         <double>27.000000000000000</double>
+        </property>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="setXBox_3">
+       <widget class="QDoubleSpinBox" name="cal_mapmt_x">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -682,6 +691,9 @@
         </property>
         <property name="singleStep">
          <double>0.250000000000000</double>
+        </property>
+        <property name="value">
+         <double>9.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -846,7 +858,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="setYBox_2">
+       <widget class="QDoubleSpinBox" name="nowYBox">
         <property name="minimum">
          <double>-10.000000000000000</double>
         </property>
@@ -859,7 +871,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="setXBox_2">
+       <widget class="QDoubleSpinBox" name="nowXBox">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -1112,7 +1124,7 @@
      <x>0</x>
      <y>0</y>
      <width>1208</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHere_I_can_type_something">
