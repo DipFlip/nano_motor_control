@@ -3,6 +3,8 @@ import QT_resource_file_rc
 import sys
 import numpy as np
 import random
+import nano_scanner as ns
+import nano_control as nc
 from matplotlib.backends.backend_qt5agg import (NavigationToolbar2QT as NavigationToolbar)
 QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
 qtCreatorFile = "motor_control_gui.ui"
@@ -13,13 +15,24 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         QtWidgets.QMainWindow.__init__(self)
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
-        self.pushButton.clicked.connect(self.move_motor)
-        self.homeMotors.clicked.connect(self.update_graph)
+        self.move_motor_button.clicked.connect(self.move_motor)
+        self.new_plot_button.clicked.connect(self.update_graph)
         self.scanstart_copy.clicked.connect(self.copy_start)
         self.scanstop_copy.clicked.connect(self.copy_stop)
+        self.initiate.clicked.connect(self.initiate_motors)
         self.mapmtMap.mousePressEvent = self.getPos
         self.setXBox.valueChanged.connect(self.move_marker)
         self.setYBox.valueChanged.connect(self.move_marker)
+        self.scanner = None
+    def initiate_motors(self, event):
+        if self.LTF_radio.isChecked():
+            LTF = True
+            nano = False
+        if self.nano_radio.isChecked():
+            LTF = False
+            nano = True
+        self.scanner = ns.Scanner(laser_setup=LTF, nano_setup=nano)
+        self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
     def getPos(self , event):
         x = event.pos().x()
         y = event.pos().y() 
@@ -36,14 +49,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.scanstop_x.setValue(self.setXBox.value())
         self.scanstop_y.setValue(self.setYBox.value())
     def move_motor(self, b):
-        if self.relative_radio.isChecked():
-            print("relative")
-        if self.absolute_radio.isChecked():
-            print("absolute")
-            self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
-        if self.mapmt_radio.isChecked():
-            print("mapmt")
-            self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/off.png'))
+        if self.LTF_radio.isChecked():
+            self.scanner.move_laser_motors(self.setXBox.value(), self.setYBox.value())
+        if self.nano_radio.isChecked():
+            self.scanner.move_nano_motors(self.setXBox.value(), self.setYBox.value())
     def update_graph(self):
         fs = 500
         f = random.randint(1, 100)
