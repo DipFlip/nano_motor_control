@@ -9,86 +9,96 @@ import psutil #to check if EFU is running
 
 class Scanner():
     """class for scanning MAPMT in the nano chamber in the micro-beam hall"""
-    def __init__(self):
+    def __init__(self, laser_setup = True, nano_setup = False):
         self.path_to_libraries = '/home/seian/LaserScan'
         self.output_directory = '/media/emil/NTFS_partition/IFE_june_2018/data'
-        self.runname = "S11"
+        if laser_setup:
+            self.steps_per_mm = 1
+        elif nano_setup:
+            self.steps_per_mm = 117647
+        self.laser_setup = laser_setup
+        self.nano_setup = nano_setup
         self.dir_to_make = f"{output_directory}/{runname}"
+        self.motor_zero_x = 0
+        self.motor_zero_y = 0
         if not os.path.exists(dir_to_make):
             os.mkdir(dir_to_make)
         else:
-            print(f"Error: Directory {self.,dir_to_make} already exists! Exiting")
+            print(f"Error: Directory {self.dir_to_make} already exists! Exiting")
             sys.exit()
-
-
-path_to_libraries = '/home/seian/LaserScan'
-output_directory = '/media/emil/NTFS_partition/IFE_june_2018/data'
-runname = "S11"
-dir_to_make = f"{output_directory}/{runname}"
-if not os.path.exists(dir_to_make):
-    os.mkdir(dir_to_make)
-else:
-    print(f"Error: Directory {dir_to_make} already exists! Exiting")
-    sys.exit()
-
-#  Enter the motor and corresponding MAPMT positions for some position
-#  and absolute motor positions for MAPMT (0,0) will be calculated.
-#  Don't consider the 0.25 mm extra of the edge pixels.
-steps_per_mm = 117647 # TODO confirm real number here
-motor_somewhere_x = 1341234
-motor_somewhere_y = 1341234
-mapmt_somewhere_x = 20
-mapmt_somewhere_y = 30
-motor_zero_x = motor_somewhere_x - mapmt_somewhere_x*steps_per_mm
-motor_zero_y = motor_somewhere_y + mapmt_somewhere_y*steps_per_mm
-
-def to_MAPMT_xy(motor_x, motor_y):
-    ### takes motor coordinates and returns MAPMT x,y coordinates (string) ###
-    x = 0 - (motor_x - motor_zero_x) / steps_per_mm
-    y = 0 - (motor_y - motor_zero_y) / steps_per_mm
-    return "{0:.2f}".format(x), "{0:.2f}".format(y)
-
-def to_motor_xy(mapmt_x, mapmt_y):
-    ### takes MAPMT coordinates and returns motor absolute x,y positions ###
-    motor_x = int(motor_zero_x + mapmt_x * steps_per_mm)
-    motor_y = int(motor_zero_y + mapmt_y * steps_per_mm)
-    return motor_x, motor_y
-
-def measure_pedestals():
-    ### TODO implement ###
-    return 0
-
-def scan(VME_daq = True, EFU_daq = False):
-    ### performs a scan ###
-    nc.configure_motor_parameters()
-    nc.home_all()
-    # TODO move Z to correct position or don't home it at all
-    x_positions = range(10,20)
-    y_positions = range(10,20)
-    for x in x_positions:
-        for y in y_positions:
-            filename = f"{output_directory}/{runname}/X{x}Y{y}_scan"
-            motor_x, motor_y = to_motor_xy(x,y)
-            print(f"Moving to X:{x}")
-            nc.select_motor('x')
-            nc.command(f"MA{motor_x}")
+        if nano_setup:
+            print('Initiating and homeing nano motors...')
+            nc.connect()
+            nc.configure_motor_parameters()
+            nc.home_all()
+        elif laser_setup:
+            subprocess.call(['gnome-terminal', '-x', self.path_to_libraries+'/testwise'])
+            print('Homeing laser motors...')
+            # TODO check if Z motor needs to be moved to somewhere...
             time.sleep(5)
-            print(f"Moving to Y:{y}")
-            nc.select_motor('y')
-            nc.command(f"MA{motor_y}")
-            time.sleep(5)
-            print("Starting DAQ")
-            if EFU_run:
-                proc = subprocess.Popen(['./bin/efu',
-                    '-d', 'modules/sonde', '-p', '50011', '--dumptofile', filename],
-                    cwd="/home/emil/essdaq/event-formation-unit/build")
-                # when enough data is taken use proc.send_signal(signal.SIGINT)
-            if VME_daq:
-                proc = subprocess.Popen([(f"./readout {config_file} "
-                    f"--daq=1 --events={num_events} --prefix={filename}.bin.gz"), cwd=path_to_libraries])
-                proc.communicate() #should wait until the process is done
-            print("Closing DAQ")
-    return 0
+    def set_motor_translation(self, motor_x, motor_t, mapmt_x, mapmt_y):
+        """
+        Enter the motor and corresponding MAPMT positions for some position
+        and absolute motor positions for MAPMT (0,0) will be calculated.
+        Don't consider the 0.25 mm extra of the edge pixels.
+        """
+        self.motor_zero_x = motor_x - mapmt_x*self.steps_per_mm
+        self.motor_zero_y = motor_y + mapmt_y*self.steps_per_mm
+    def to_MAPMT_xy(self, motor_x, motor_y):
+        """takes motor coordinates and returns MAPMT x,y coordinates (string)"""
+        x = 0 - (motor_x - motor_zero_x) / self.steps_per_mm
+        y = 0 - (motor_y - motor_zero_y) / self.steps_per_mm
+        return "{0:.2f}".format(x), "{0:.2f}".format(y)
+    def to_motor_xy(self, mapmt_x, mapmt_y):
+        """takes MAPMT coordinates and returns motor absolute x,y positions"""
+        motor_x = int(self.motor_zero_x + mapmt_x * self.steps_per_mm)
+        motor_y = int(self.motor_zero_y + mapmt_y * self.steps_per_mm)
+        return motor_x, motor_y
+    def measure_pedestals(self):
+        """ TODO implement """
+        print("Not implemented!")
+        return 0
+    def move_nano_motors(self, x, y):
+        """Takes MAPMT coordinates and moves accelerator beam to that position"""
+        motor_x, motor_y = self.to_motor_xy(x,y)
+        print(f"Moving to X:{x}")
+        nc.select_motor('x')
+        nc.command(f"MA{motor_x}")
+        time.sleep(5)
+        print(f"Moving to Y:{y}")
+        nc.select_motor('y')
+        nc.command(f"MA{motor_y}")
+        time.sleep(5)
+    def move_laser_motors(self, x, y):
+        """Takes MAPMT coordinates and moves laser setup to that position"""
+        motor_x, motor_y = self.to_motor_xy(x, y)
+        print(f"Moving to X:{x}")
+        subprocess.call(self.path_to_libraries + f"/work M 1 {motor_x}")
+        time.sleep(5)
+        print(f"Moving to Y:{y}")
+        subprocess.call(self.path_to_libraries + f"/work M 2 {motor_y}")
+        time.sleep(5)
+    def scan(self, x_positions = range(10,20), y_positions = range(10,20), runname='runname', VME_daq = True, EFU_daq = False, laser_setup = True, nano_setup = False):
+        """performs a scan """
+        for x in x_positions:
+            for y in y_positions:
+                filename = f"{self.output_directory}/{self.runname}/X{x}Y{y}_scan"
+                if laser_setup:
+                    self.move_laser_motors(x, y)
+                elif nano_setup:
+                    self.move_nano_motors(x, y)
+                print("Starting DAQ")
+                if EFU_run:
+                    proc = subprocess.Popen(['./bin/efu',
+                        '-d', 'modules/sonde', '-p', '50011', '--dumptofile', filename],
+                        cwd="/home/emil/essdaq/event-formation-unit/build")
+                    # when enough data is taken use proc.send_signal(signal.SIGINT)
+                if VME_daq:
+                    proc = subprocess.Popen([('./readout', f"{config_file}",
+                        f"--daq=1", f"--events={num_events}", f"--prefix={filename}.bin.gz")], cwd=self.path_to_libraries)
+                    proc.communicate() #should wait until the process is done
+                print("Closing DAQ")
+        return 0
 
 
 # convert files from binary to root

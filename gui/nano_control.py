@@ -76,15 +76,15 @@
 import serial
 import time
 
-#connect
-ser = serial.Serial(port='/dev/ttyUSB0',baudrate=9600, 
-    bytesize=8, stopbits=1, parity=serial.PARITY_NONE, timeout=1, xonxoff=0, rtscts=0, dsrdtr=0)
+def connect():
+    ser = serial.Serial(port='/dev/ttyUSB0',baudrate=9600, 
+        bytesize=8, stopbits=1, parity=serial.PARITY_NONE, timeout=1, xonxoff=0, rtscts=0, dsrdtr=0)
 
 def select_motor(motor_address):
     """write the character 0x01 followed by the motor address number without /r to select that motor"""
-    if motor_address = 'x':
+    if motor_address == 'x':
         motor_address = 4
-    if motor_address = 'y':
+    if motor_address == 'y':
         motor_address = 3
     ser.write(b'\x01' + str(motor_address).encode())
 
@@ -111,7 +111,6 @@ def configure_motor_parameters():
         command('LN') #Limit switch operation ON
         command('BF') #Set brake OFF
         command('MN') #Turn motor ON
-    
     select_motor(4) #X motor
     write_parameters(SA = 500000, SV = 120000, DP = 130, DI = 20, DD = 320, DL = 2000)
     select_motor(3) #Y motor
