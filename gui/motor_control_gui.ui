@@ -42,7 +42,7 @@
       <x>610</x>
       <y>50</y>
       <width>401</width>
-      <height>331</height>
+      <height>411</height>
      </rect>
     </property>
     <property name="title">
@@ -54,7 +54,7 @@
        <x>20</x>
        <y>40</y>
        <width>343</width>
-       <height>282</height>
+       <height>358</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="scan_window">
@@ -412,6 +412,58 @@
         </property>
        </widget>
       </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_9">
+        <item>
+         <widget class="QLabel" name="label_26">
+          <property name="text">
+           <string>This position</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_25">
+          <property name="text">
+           <string>Total scan</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QProgressBar" name="progress_this_position">
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progress_scan">
+          <property name="value">
+           <number>0</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
+      </item>
      </layout>
     </widget>
    </widget>
@@ -544,8 +596,8 @@
    <widget class="QGroupBox" name="groupBox_4">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>390</y>
+      <x>640</x>
+      <y>470</y>
       <width>321</width>
       <height>191</height>
      </rect>
@@ -958,8 +1010,8 @@
      <widget class="QLabel" name="motor_marker_to_go">
       <property name="geometry">
        <rect>
-        <x>180</x>
-        <y>120</y>
+        <x>4</x>
+        <y>251</y>
         <width>20</width>
         <height>20</height>
        </rect>
@@ -980,8 +1032,8 @@
      <widget class="QLabel" name="motor_marker_now">
       <property name="geometry">
        <rect>
-        <x>130</x>
-        <y>60</y>
+        <x>4</x>
+        <y>251</y>
         <width>20</width>
         <height>20</height>
        </rect>
@@ -1124,7 +1176,7 @@
      <x>0</x>
      <y>0</y>
      <width>1208</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHere_I_can_type_something">

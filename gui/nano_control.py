@@ -75,13 +75,16 @@
 
 import serial
 import time
-
+ser = None
 def connect():
     ser = serial.Serial(port='/dev/ttyUSB0',baudrate=9600, 
         bytesize=8, stopbits=1, parity=serial.PARITY_NONE, timeout=1, xonxoff=0, rtscts=0, dsrdtr=0)
+    return ser
 
 def select_motor(motor_address):
     """write the character 0x01 followed by the motor address number without /r to select that motor"""
+    if ser is None:
+            ser = connect()
     if motor_address == 'x':
         motor_address = 4
     if motor_address == 'y':
@@ -90,6 +93,8 @@ def select_motor(motor_address):
 
 def command(command_string):
     """Sends the command followed by \r then prints and returns the response """
+    if ser is None:
+            ser = connect()
     ser.write(command_string.encode() + b'\r')
     response = ser.readline()#.strip('\r\n'+chr(0x03))  #the controller's replies 
                                                         #end with '\n\r'+ETX (end-of-text, 0x03),
