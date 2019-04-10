@@ -223,7 +223,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox">
+         <widget class="QDoubleSpinBox" name="step_size_box">
           <property name="minimum">
            <double>0.010000000000000</double>
           </property>
@@ -276,9 +276,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+         <widget class="QDoubleSpinBox" name="time_per_pos_box">
           <property name="decimals">
-           <number>1</number>
+           <number>0</number>
           </property>
           <property name="minimum">
            <double>0.000000000000000</double>
@@ -332,7 +332,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+         <widget class="QDoubleSpinBox" name="num_events_box">
           <property name="decimals">
            <number>0</number>
           </property>
@@ -388,7 +388,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QLineEdit" name="runname_box"/>
         </item>
         <item>
          <spacer name="horizontalSpacer_3">
@@ -406,7 +406,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="homeMotors_2">
+       <widget class="QPushButton" name="start_scan_button">
         <property name="text">
          <string>Start scan</string>
         </property>
@@ -574,19 +574,22 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QRadioButton" name="mapmt_radio_3">
+       <widget class="QRadioButton" name="VME_readout_radio">
         <property name="text">
          <string>VME readout</string>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="absolute_radio_3">
+       <widget class="QRadioButton" name="EFU_readout_radio">
         <property name="text">
          <string>SoNDe readout</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -1176,7 +1179,7 @@
      <x>0</x>
      <y>0</y>
      <width>1208</width>
-     <height>22</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuHere_I_can_type_something">

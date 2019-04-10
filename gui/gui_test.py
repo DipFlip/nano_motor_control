@@ -17,6 +17,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.move_motor_button.clicked.connect(self.move_motor)
         self.new_plot_button.clicked.connect(self.update_graph)
+        self.start_scan_button.clicked.connect(self.perform_scan)
         self.scanstart_copy.clicked.connect(self.copy_start)
         self.calibrate_button.clicked.connect(self.calibrate)
         self.scanstop_copy.clicked.connect(self.copy_stop)
@@ -34,8 +35,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             nano = True
         self.scanner = ns.Scanner(laser_setup=LTF, nano_setup=nano)
         self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
-        self.YMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
-        self.ZMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
+        self.yMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
+        self.zMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
     def calibrate(self):
         self.scanner.set_motor_translation(self.cal_motor_x.value(), self.cal_motor_y.value(), self.cal_mapmt_x.value(), self.cal_mapmt_y.value())
     def getPos(self , event):
@@ -78,6 +79,25 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.MplWidget.canvas.axes.legend(('cosinus', 'sinus'),loc='upper right')
         self.MplWidget.canvas.axes.set_title('Cosinus - Sinus Signal')
         self.MplWidget.canvas.draw()
+    def perform_scan(self):
+        """performs a scan with set parameters"""
+        step_size = self.step_size_box.value()
+        x_positions = np.arange(self.scanstart_x.value(), self.scanstop_x.value()+step_size, step_size)
+        y_positions = np.arange(self.scanstart_y.value(), self.scanstop_y.value()+step_size, step_size)
+        time_per_pos = self.time_per_pos_box.value()
+        num_events = self.num_events_box.value()
+        runname = self.runname_box.text()
+        if self.EFU_readout_radio.isChecked():
+            EFU_daq = True
+            VME_daq = False
+        elif self.VME_readout_radio.isChecked():
+            EFU_daq = False
+            VME_daq = True
+        print("Sending command to start scan...")
+        self.scanner.scan(x_positions = x_positions, y_positions = y_positions, runname=runname, 
+            num_events = num_events, time_per_pos = time_per_pos, VME_daq = VME_daq, EFU_daq = EFU_daq)
+            
+            
 
 def wid_rel_to_mapmt_xy(rel_x, rel_y):
     x = rel_x*48.5/249-2.7
