@@ -18,37 +18,10 @@ RXBUFFER = 4096
 #              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
 #              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
 
-def pix_to_asic_channel(pix):
-    pix2asic = [1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,3,3,3,3,2,2,2,2,3,3,3,3,2,2,2,2,3,3,
-              3,3,2,2,2,2,3,3,3,3,2,2,2,2]
-    pix2ch = [0,1,2,3,15,14,13,12,4,5,6,7,11,10,9,8,8,9,10,11,7,6,5,4,12,13,14,15,3,2,1,0,0,1,2,3,15,14,13,12,4,5,6,7,
-           11,10,9,8,8,9,10,11,7,6,5,4,12,13,14,15,3,2,1,0]
-    return pix2asic[pix-1], pix2ch[pix-1]
-
-def generate_threshold_array(threshold):
-    """returns array of 64 integers with thresholds scaled so highest pixel has the given threshold value"""
-    import numpy as np
-    ZA0250_gainmap = np.array([78,75,68,70,86,77,77,67,74,72,66,71,83,79,77,73,92,73,67,72,83,85,80,72,98,71,65,68,82,81,73,70,100,
-                      70,63,65,77,78,78,73,99,77,71,74,84,83,79,69,99,78,73,76,86,80,73,63,93,80,74,77,86,83,73,60])
-    thresholds = np.ones(64)*threshold
-    return np.round(thresholds*(ZA0250_gainmap/100)).astype(int).tolist()
-
-def make64threshasiccfg(thresholds):
-    asiccfgs = [[0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + [0x00]*32 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80],
-                [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + [0x00]*32 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80],
-                [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + [0x00]*32 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80],
-                [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + [0x00]*32 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80]]
-    for pix, threshold in enumerate(thresholds):
-        asic, channel = pix_to_asic_channel(pix+1)
-        asiccfgs[asic][37-2*channel] = (threshold >> 4) | ((threshold & 0xf) << 4)
-        asiccfgs[asic][37-2*channel-1] = (threshold >> 4) | ((threshold & 0xf) << 4)
-    return asiccfgs
-
-# \todo - this probably nearly correct, based on IDEAS gui and wireshark capture
+# @todo - this probably nearly correct, based on IDEAS gui and wireshark capture
 def makeasiccfg(threshold):
     tswap = (threshold >> 4) | ((threshold & 0xf) << 4)
-    res = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + [tswap]*32 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80]
-    #res = [0x00, 0x00, 0x00] + [tswap]*36 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x80]
+    res = [0x00, 0x00, 0x00] + [tswap]*36 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x80]
     return res
 
 registers = {'Serial Number': 0x0000,
@@ -216,32 +189,23 @@ class IdeasCtrl():
       self.writesystemregister16('cfg_event_num_timing', numevents)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
-   def start_all_ch_spec_readout(self, threshold):
+   def start_all_ch_spec_readout(self):
        asiccfg = makeasiccfg(threshold)
-       thresholds = generate_threshold_array(threshold)
-       import numpy as np
-       thresholds = np.ones(64).astype(int)*250
-#       thresholds[12] = 77
-#       thresholds[20] = 84
-       thresholds[33] = 114 #sets threshold on P34
-       thresholds[25] = 112 #sets threshold on P26
-       asiccfgs = make64threshasiccfg(thresholds)
-       for i in range(4):
-           asiccfgs[i] = asiccfg
        asiccfg_bits=356
        self.writesystemregister8('cfg_timing_readout_en', 0)
        self.writesystemregister8('cfg_phystrig_en', 0)
        self.writesystemregister8('cfg_forced_en', 0)
        self.writesystemregister8('cfg_all_ch_en', 0)
        self.writesystemregister8('cfg_event_num_vata', 1)
-       self.writeasicconf(self.asic.id0, asiccfgs[0], asiccfg_bits)
-       self.writeasicconf(self.asic.id1, asiccfgs[1], asiccfg_bits)
-       self.writeasicconf(self.asic.id2, asiccfgs[2], asiccfg_bits)
-       self.writeasicconf(self.asic.id3, asiccfgs[3], asiccfg_bits)
-       self.writeasicconf(self.asic.id0, asiccfgs[0], asiccfg_bits)
-       self.writeasicconf(self.asic.id1, asiccfgs[1], asiccfg_bits)
-       self.writeasicconf(self.asic.id2, asiccfgs[2], asiccfg_bits)
-       self.writeasicconf(self.asic.id3, asiccfgs[3], asiccfg_bits)
+       self.writeasicconf(self.asic.id0, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id1, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id2, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id3, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id0, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id1, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id2, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id3, asiccfg, asiccfg_bits)
+
        self.writesystemregister8('cfg_phystrig_en', 1)
        #TODO: maybe clear any event that was registered here
        self.writesystemregister8('cfg_phystrig_en', 0)
@@ -307,7 +271,7 @@ if __name__ == '__main__':
          ctrl.stopreadout()
 
       elif args.c == "start_TOF":
-         print(f"Starting TOF Readout with threshold {threshold} and {eventsperpacket} events per packet.")
+         print("Starting TOF Readout")
          ctrl.start_TOF_readout(threshold, eventsperpacket)
       #
       # elif args.c == "start_single_ch":
@@ -315,8 +279,8 @@ if __name__ == '__main__':
       #    ctrl.start_single_ch_spec_readout()
       #
       elif args.c == "start_all_ch":
-          print(f"Starting all ch spec Readout with threshold {threshold}")
-          ctrl.start_all_ch_spec_readout(threshold)
+          print("Starting all ch spec Readout")
+          ctrl.start_all_ch_spec_readout()
       #
       # elif args.c == "config":
       #    print("Configure System for Time Triggered Readout")

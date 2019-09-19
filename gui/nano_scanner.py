@@ -6,6 +6,7 @@ from datetime import datetime #TODO write time for each scan position in log fil
 import time
 import psutil #to check if EFU is running
 from tqdm import tqdm # for fancy terminal progress bar
+import glob # to check if file exists
 
 class Scanner():
     """class for scanning MAPMT in the nano chamber in the micro-beam hall"""
@@ -81,16 +82,18 @@ class Scanner():
     def move_laser_motors(self, x, y):
         """Takes MAPMT coordinates and moves laser setup to that position"""
         motor_x, motor_y = self.to_motor_xy(x, y)
-        print(f"Moving to X:{x} which is {motor_x}")
+        print(f"Moving to X:{x} (motor:{motor_x})")
         subprocess.call([self.path_to_libraries + f"/work", "M", "1", f"{motor_x}"])
-        time.sleep(1)
-        print(f"Moving to Y:{y} which is {motor_y}")
+        time.sleep(6)
+        print(f"Moving to Y:{y} (motor:{motor_y})")
         subprocess.call([self.path_to_libraries + f"/work", "M", "2", f"{motor_y}"])
-        time.sleep(1)
+        time.sleep(6)
     def scan(self, x_positions = range(10,20), y_positions = range(10,20), runname='runname', 
             num_events = 10000, time_per_pos = None, VME_daq = True, EFU_daq = False):
         """performs a scan, defaults to VME readout at LTF with laser motors"""
         dir_to_make = f"{self.output_directory}/{runname}"
+        filename = 'file not set yet'
+        print('scan about to start')
         if not os.path.exists(dir_to_make):
             os.mkdir(dir_to_make)
         else:
@@ -105,20 +108,23 @@ class Scanner():
                     self.move_nano_motors(x, y)
                 print("Starting DAQ")
                 if EFU_daq:
-                    proc = subprocess.Popen(['./bin/efu',
-                        '-d', 'modules/sonde', '-p', '50011', '--dumptofile', filename],
-                        cwd="/home/erofors/essdaq/efu/event-formation-unit/build")
+                    proc = subprocess.Popen(['./efu_dump_start.sh', filename],
+                        cwd="/home/erofors/essdaq/efu")
                     if time_per_pos is not None:
                         print(f"Measuring pos x:{x}, y:{y} for {time_per_pos} seconds.")
                         for i in tqdm(range(int(time_per_pos))):
                             time.sleep(1)
-                        proc.send_signal(signal.SIGINT)
+                            if glob.glob(f"{filename}*_2.csv"):
+                                print("got 100 MB of data at this point. Breaking early to move on.")
+                                break
+                        subprocess.call('./efu_stop.sh', cwd="/home/erofors/essdaq/efu")
+                        time.sleep(1)
                 if VME_daq:
                     proc = subprocess.Popen([('./readout', f"{self.path_to_libraries}/readout.cfg",
                         f"--daq=1", f"--events={num_events}", f"--prefix={filename}.bin.gz")], cwd=self.path_to_libraries)
                     proc.communicate() #should wait until the process is done
                 print(f"Position x:{x}, y:{y} done")
-            print(f"Scan done, last filename was {filename}")
+        print(f"Scan done, last filename was {filename}")
         return 0
 def check_if_process_is_running(process_name):
     for pid in psutil.pids():

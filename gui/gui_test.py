@@ -83,7 +83,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         """performs a scan with set parameters"""
         step_size = self.step_size_box.value()
         x_positions = np.arange(self.scanstart_x.value(), self.scanstop_x.value()+step_size, step_size)
-        y_positions = np.arange(self.scanstart_y.value(), self.scanstop_y.value()+step_size, step_size)
+        y_positions = np.arange(self.scanstart_y.value(), self.scanstop_y.value()-step_size, -step_size)
         time_per_pos = self.time_per_pos_box.value()
         num_events = self.num_events_box.value()
         runname = self.runname_box.text()
