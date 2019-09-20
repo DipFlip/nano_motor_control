@@ -92,6 +92,8 @@ def select_motor(motor_address):
         motor_address = 4
     if motor_address == 'y':
         motor_address = 3
+    if motor_address == 'z':
+        motor_address = 2
     ser.write(b'\x01' + str(motor_address).encode())
 
 def command(command_string):
@@ -156,4 +158,5 @@ def reset_all():
 
 #Y motor (3): 1000000 steps is 6 mm down, total range is 1 cm
 #X motor (4): -2000000 steps is 17 mm beam right, total range is 1 cm 
-#Z motor (2): negative relative steps is towards the beam
+#Z motor (2): negative relative steps is towards the beam. 1000000 steps is 6 mm away from beam
+
