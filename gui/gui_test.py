@@ -27,12 +27,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setYBox.valueChanged.connect(self.move_marker)
         self.scanner = None
     def initiate_motors(self, event):
-        if self.LTF_radio.isChecked():
-            LTF = True
-            nano = False
-        if self.nano_radio.isChecked():
-            LTF = False
-            nano = True
+        LTF = self.LTF_radio.isChecked()
+        nano = self.nano_radio.isChecked()
         self.scanner = ns.Scanner(laser_setup=LTF, nano_setup=nano)
         self.xMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
         self.yMotorIndicator.setPixmap(QtGui.QPixmap(':/bilder/on.png'))
@@ -58,9 +54,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         x = self.setXBox.value()
         y = self.setYBox.value()
         if self.LTF_radio.isChecked():
-            self.scanner.move_laser_motors(x, y)
+            self.scanner.move_laser_motors_abs(x, y)
         if self.nano_radio.isChecked():
-            self.scanner.move_nano_motors(x, y)
+            self.scanner.move_nano_motors_abs(x, y)
         rel_x, rel_y = mapmt_xy_to_wid_rel(x, y)
         self.motor_marker_now.move(rel_x-5, rel_y-8)
         self.nowXBox.setValue(x)
@@ -87,12 +83,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         time_per_pos = self.time_per_pos_box.value()
         num_events = self.num_events_box.value()
         runname = self.runname_box.text()
-        if self.EFU_readout_radio.isChecked():
-            EFU_daq = True
-            VME_daq = False
-        elif self.VME_readout_radio.isChecked():
-            EFU_daq = False
-            VME_daq = True
+        EFU_daq = self.EFU_readout_radio.isChecked()
+        VME_daq = self.VME_readout_radio.isChecked()
         print("Sending command to start scan...")
         self.scanner.scan(x_positions = x_positions, y_positions = y_positions, runname=runname, 
             num_events = num_events, time_per_pos = time_per_pos, VME_daq = VME_daq, EFU_daq = EFU_daq)

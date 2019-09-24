@@ -14,9 +14,11 @@ class Scanner():
         self.path_to_libraries = '/home/erofors/LaserScan'
         self.output_directory = '/home/erofors/data'
         if laser_setup:
-            self.steps_per_mm = 1
+            self.steps_per_mm_x = 1
+            self.steps_per_mm_y = 1
         elif nano_setup:
-            self.steps_per_mm = 117647
+            self.steps_per_mm_x = 117647
+            self.steps_per_mm_y = 147059
         self.laser_setup = laser_setup
         self.nano_setup = nano_setup
         self.motor_zero_x = 0
@@ -25,7 +27,7 @@ class Scanner():
             print('Initiating and homeing nano motors...')
             nc.connect()
             nc.configure_motor_parameters()
-            nc.home_all()
+            #nc.home_all() #Not sure it needs to be done
         elif laser_setup:
             if not check_if_process_is_running('testwise'):
                 print('testwise wasnt running..')
@@ -41,19 +43,19 @@ class Scanner():
         Don't consider the 0.25 mm extra of the edge pixels.
         """
         if self.nano_setup:
-            self.motor_zero_x = motor_x - mapmt_x*self.steps_per_mm # for nano motors
+            self.motor_zero_x = motor_x - mapmt_x*self.steps_per_mm_x # for nano motors
         if self.laser_setup:
-            self.motor_zero_x = motor_x + mapmt_x*self.steps_per_mm #for LTF motors
-        self.motor_zero_y = motor_y + mapmt_y*self.steps_per_mm
+            self.motor_zero_x = motor_x + mapmt_x*self.steps_per_mm_x #for LTF motors
+        self.motor_zero_y = motor_y + mapmt_y*self.steps_per_mm_y
         print(f"motor zero x:{self.motor_zero_x}, y:{self.motor_zero_y}")
     def to_MAPMT_xy(self, motor_x, motor_y):
         """takes motor coordinates and returns MAPMT x,y coordinates (string)"""
         if self.nano_setup:
-            x = 0 - (motor_x - self.motor_zero_x) / self.steps_per_mm
-            y = 0 - (motor_y - self.motor_zero_y) / self.steps_per_mm
+            x = 0 - (motor_x - self.motor_zero_x) / self.steps_per_mm_x
+            y = 0 - (motor_y - self.motor_zero_y) / self.steps_per_mm_y
         if self.laser_setup:
-            x = 0 - (self.motor_zero_x - motor_x) / self.steps_per_mm
-            y = 0 - (self.motor_zero_y - motor_y) / self.steps_per_mm
+            x = 0 - (self.motor_zero_x - motor_x) / self.steps_per_mm_x
+            y = 0 - (self.motor_zero_y - motor_y) / self.steps_per_mm_y
         return "{0:.2f}".format(x), "{0:.2f}".format(y)
     def to_motor_xy(self, mapmt_x, mapmt_y):
         """takes MAPMT coordinates and returns motor absolute x,y positions"""
@@ -68,26 +70,39 @@ class Scanner():
         """ TODO implement """
         print("Not implemented!")
         return 0
-    def move_nano_motors(self, x, y):
+    def move_nano_motors_abs(self, x, y):
         """Takes MAPMT coordinates and moves accelerator beam to that position"""
         motor_x, motor_y = self.to_motor_xy(x,y)
-        print(f"Moving to X:{x}")
+        print(f"Moving to MaPMT X:{x} (motor:{motor_x})")
         nc.select_motor('x')
         nc.command(f"MA{motor_x}")
         time.sleep(5)
-        print(f"Moving to Y:{y}")
+        print(f"Moving to MaPMT Y:{y} (motor:{motor_y})")
         nc.select_motor('y')
         nc.command(f"MA{motor_y}")
         time.sleep(5)
-    def move_laser_motors(self, x, y):
+    def move_laser_motors_abs(self, x, y):
         """Takes MAPMT coordinates and moves laser setup to that position"""
         motor_x, motor_y = self.to_motor_xy(x, y)
-        print(f"Moving to X:{x} (motor:{motor_x})")
+        print(f"Moving to MaPMT X:{x} (motor:{motor_x})")
         subprocess.call([self.path_to_libraries + f"/work", "M", "1", f"{motor_x}"])
         time.sleep(6)
-        print(f"Moving to Y:{y} (motor:{motor_y})")
+        print(f"Moving to MaPMT Y:{y} (motor:{motor_y})")
         subprocess.call([self.path_to_libraries + f"/work", "M", "2", f"{motor_y}"])
         time.sleep(6)
+    def move_nano_motors_rel(self, x=0, y=0):
+        """Takes measurements x and y in mm and moves the beam those directions"""
+        if x is not 0:
+            nc.select_motor('x')
+            nc.command(f"MR{x*self.steps_per_mm_x}") #TODO check if sign should be flipped
+            time.sleep(5)
+        if y is not 0:
+            nc.select_motor('y')
+            nc.command(f"MR{y*self.steps_per_mm_y}") #TODO check if sign should be flipped
+            time.sleep(5)
+    def move_laser_motors_rel(self, x=0, y=0):
+        """Takes measurements x and y in mm and moves the beam those directions"""
+        print("TODO implement me!")
     def scan(self, x_positions = range(10,20), y_positions = range(10,20), runname='runname', 
             num_events = 10000, time_per_pos = None, VME_daq = True, EFU_daq = False):
         """performs a scan, defaults to VME readout at LTF with laser motors"""
@@ -103,9 +118,9 @@ class Scanner():
             for y in y_positions:
                 filename = f"{self.output_directory}/{runname}/X{x}Y{y}_scan"
                 if self.laser_setup:
-                    self.move_laser_motors(x, y)
+                    self.move_laser_motors_abs(x, y)
                 elif self.nano_setup:
-                    self.move_nano_motors(x, y)
+                    self.move_nano_motors_abs(x, y)
                 print("Starting DAQ")
                 if EFU_daq:
                     proc = subprocess.Popen(['./efu_dump_start.sh', filename],
