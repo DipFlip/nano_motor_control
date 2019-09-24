@@ -94,6 +94,10 @@ def select_motor(motor_address):
         motor_address = 3
     if motor_address == 'z':
         motor_address = 2
+    if motor_address == 'o':
+        motor_address = 1
+    if motor_address == 'r':
+        motor_address = 0
     ser.write(b'\x01' + str(motor_address).encode())
 
 def command(command_string):
@@ -102,11 +106,16 @@ def command(command_string):
     if ser is None:
             ser = connect()
     ser.write(command_string.encode() + b'\r')
-    response = ser.readline()#.strip('\r\n'+chr(0x03))  #the controller's replies 
+    response = ser.readline().decode('UTF-8').strip('\r\n'+chr(0x03))  #the controller's replies 
                                                         #end with '\n\r'+ETX (end-of-text, 0x03),
-                                                        #which should be removed.
+                                                        #which should be removed
     print(response)
     return response
+
+def get_position():
+    response = command('TP')
+    position = int(response[2:])
+    return position
 
 def configure_motor_parameters():
     """ Configures motor parameters for X (4), Y(3) and Z(2) motors and turns them on """
@@ -128,6 +137,8 @@ def configure_motor_parameters():
     write_parameters(SA = 750000, SV = 175000, DP = 250, DI = 12, DD = 250, DL = 2000)
     select_motor(2) #Z motor
     write_parameters(SA = 750000, SV = 175000, DP = 250, DI = 12, DD = 250, DL = 2000)
+    select_motor(1) #Objective motor
+    write_parameters(SA = 500000, SV = 120000, DP = 130, DI = 20, DD = 320, DL = 2000)
 
 def home_all():
         """ 
@@ -160,3 +171,5 @@ def reset_all():
 #X motor (4): -2000000 steps is 17 mm beam right, total range is 1 cm 
 #Z motor (2): negative relative steps is towards the beam. 1000000 steps is 6 mm away from beam
 
+#real: 1 mm X right is  117647
+# 1 mm Z back/Y down is 147059
