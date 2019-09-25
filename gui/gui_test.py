@@ -16,6 +16,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
         self.move_motor_button.clicked.connect(self.move_motor)
+        self.rel_left_button.clicked.connect(self.move_beam_left)
+        self.rel_right_button.clicked.connect(self.move_beam_right)
+        self.rel_up_button.clicked.connect(self.move_beam_up)
+        self.rel_down_button.clicked.connect(self.move_beam_down)
         self.new_plot_button.clicked.connect(self.update_graph)
         self.start_scan_button.clicked.connect(self.perform_scan)
         self.scanstart_copy.clicked.connect(self.copy_start)
@@ -61,6 +65,14 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.motor_marker_now.move(rel_x-5, rel_y-8)
         self.nowXBox.setValue(x)
         self.nowYBox.setValue(y)
+    def move_beam_up(self):
+        self.scanner.move_nano_motors_rel(y=self.mm_to_move_box.value())
+    def move_beam_down(self):
+        self.scanner.move_nano_motors_rel(y=-self.mm_to_move_box.value())
+    def move_beam_left(self):
+        self.scanner.move_nano_motors_rel(x=self.mm_to_move_box.value())
+    def move_beam_right(self):
+        self.scanner.move_nano_motors_rel(x=-self.mm_to_move_box.value())
     def update_graph(self):
         fs = 500
         f = random.randint(1, 100)

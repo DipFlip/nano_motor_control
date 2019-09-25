@@ -91,15 +91,18 @@ class Scanner():
         subprocess.call([self.path_to_libraries + f"/work", "M", "2", f"{motor_y}"])
         time.sleep(6)
     def move_nano_motors_rel(self, x=0, y=0):
-        """Takes measurements x and y in mm and moves the beam those directions"""
+        """
+        Takes measurements x and y in mm and moves the beam those directions
+        left = negative, right = positive, down = negative, up= positive
+        """
         if x is not 0:
             nc.select_motor('x')
             nc.command(f"MR{x*self.steps_per_mm_x}") #TODO check if sign should be flipped
-            time.sleep(5)
+            time.sleep(1)
         if y is not 0:
             nc.select_motor('y')
             nc.command(f"MR{y*self.steps_per_mm_y}") #TODO check if sign should be flipped
-            time.sleep(5)
+            time.sleep(1)
     def move_laser_motors_rel(self, x=0, y=0):
         """Takes measurements x and y in mm and moves the beam those directions"""
         print("TODO implement me!")

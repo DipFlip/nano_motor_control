@@ -1200,13 +1200,13 @@
      </rect>
     </property>
     <property name="title">
-     <string>Relative Motor Movement</string>
+     <string>Relative Motor Movement of the detector</string>
     </property>
-    <widget class="QPushButton" name="pushButton">
+    <widget class="QPushButton" name="rel_up_button">
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>150</y>
+       <x>130</x>
+       <y>140</y>
        <width>80</width>
        <height>23</height>
       </rect>
@@ -1215,7 +1215,7 @@
       <string>Up</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_down">
+    <widget class="QPushButton" name="rel_down_button">
      <property name="geometry">
       <rect>
        <x>120</x>
@@ -1228,7 +1228,7 @@
       <string>Down</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_3">
+    <widget class="QPushButton" name="rel_left_button">
      <property name="geometry">
       <rect>
        <x>30</x>
@@ -1241,7 +1241,7 @@
       <string>Left</string>
      </property>
     </widget>
-    <widget class="QPushButton" name="pushButton_4">
+    <widget class="QPushButton" name="rel_right_button">
      <property name="geometry">
       <rect>
        <x>210</x>
@@ -1254,92 +1254,64 @@
       <string>Right</string>
      </property>
     </widget>
-    <widget class="QWidget" name="gridLayoutWidget_5">
+    <widget class="QWidget" name="">
      <property name="geometry">
       <rect>
-       <x>80</x>
-       <y>30</y>
-       <width>221</width>
-       <height>80</height>
+       <x>60</x>
+       <y>40</y>
+       <width>215</width>
+       <height>75</height>
       </rect>
      </property>
-     <layout class="QGridLayout" name="gridLayout_7">
-      <item row="0" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_7">
-        <item>
-         <spacer name="horizontalSpacer_9">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_27">
-          <property name="text">
-           <string>Mm to move</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QDoubleSpinBox" name="doubleSpinBox"/>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <spacer name="horizontalSpacer_9">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>13</width>
+          <height>73</height>
+         </size>
+        </property>
+       </spacer>
       </item>
-      <item row="1" column="0">
-       <layout class="QHBoxLayout" name="horizontalLayout_11">
-        <item>
-         <spacer name="horizontalSpacer_12">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_28">
-          <property name="text">
-           <string>Something</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <spacer name="horizontalSpacer_11">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-       </layout>
+      <item>
+       <widget class="QLabel" name="label_27">
+        <property name="text">
+         <string>Mm to move</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="mm_to_move_box">
+        <property name="decimals">
+         <number>4</number>
+        </property>
+        <property name="minimum">
+         <double>-100.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_10">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>13</width>
+          <height>73</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </widget>
